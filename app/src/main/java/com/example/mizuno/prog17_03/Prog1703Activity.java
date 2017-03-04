@@ -13,7 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,8 +54,38 @@ public class Prog1703Activity extends AppCompatActivity implements View.OnClickL
             startActivityForResult(intent, IMAGE_CAPTURE);
         }
         if(v.getId() == R.id.button2){//送信ボタン
-            AsyncHttp post = new AsyncHttp(ctx);//コンテキストを渡す(Toastのため)
-            post.execute(file);
+            //AsyncHttp post = new AsyncHttp(ctx);//コンテキストを渡す(Toastのため)
+            //post.execute(file);
+            AsyncBinary asyncBinary = new AsyncBinary(ctx);
+            InputStream is = null;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                is = new FileInputStream(file.getPath());
+                int len;
+                byte[] buffer = new byte[10240];
+
+                while ((len = is.read(buffer)) > 0)
+                {
+                    baos.write(buffer, 0, len);
+                }
+                //変更点
+                asyncBinary.setValue(file.getName(), baos.toByteArray());//コンテキストを渡す(Toastのため)
+            } catch (Exception e) {
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {}
+                try {
+                    baos.close();
+                } catch (IOException e) {}
+            }
+
+            // リスナーをセットする
+            //task.setListener(MainActivity.this);
+
+            //実行
+            asyncBinary.execute();
+
         }
     }
 
